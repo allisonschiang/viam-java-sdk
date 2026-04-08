@@ -5,8 +5,6 @@ import com.viam.common.v1.Common;
 import com.viam.common.v1.Common.Geometry;
 import com.viam.common.v1.Common.GetGeometriesResponse;
 import com.viam.common.v1.Common.ResponseMetadata;
-import com.viam.component.camera.v1.Camera.GetImageRequest;
-import com.viam.component.camera.v1.Camera.GetImageResponse;
 import com.viam.component.camera.v1.Camera.GetImagesRequest;
 import com.viam.component.camera.v1.Camera.GetImagesResponse;
 import com.viam.component.camera.v1.Camera.Image;
@@ -52,25 +50,13 @@ public class CameraRPCService extends
   }
 
   @Override
-  public void getImage(GetImageRequest request,
-      StreamObserver<GetImageResponse> responseObserver) {
-    final Camera camera = getResource(
-        Camera.named(request.getName()));
-    final Image result = camera.getImage(Camera.mimeToFormat(request.getMimeType()),
-        Optional.of(request.getExtra()));
-
-    responseObserver.onNext(
-        GetImageResponse.newBuilder().setImage(result.getImage())
-            .setMimeType(Camera.formatToMime(result.getFormat())).build());
-    responseObserver.onCompleted();
-  }
-
-  @Override
   public void getImages(GetImagesRequest request,
       StreamObserver<GetImagesResponse> responseObserver) {
     final Camera camera = getResource(
         Camera.named(request.getName()));
-    final Entry<List<Image>, ResponseMetadata> result = camera.getImages();
+    final Entry<List<Image>, ResponseMetadata> result = camera.getImages(
+        Optional.of(request.getFilterSourceNamesList()),
+        Optional.of(request.getExtra()));
     responseObserver.onNext(
         GetImagesResponse.newBuilder().addAllImages(result.getKey())
             .setResponseMetadata(result.getValue()).build());
